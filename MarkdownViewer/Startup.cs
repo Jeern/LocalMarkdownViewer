@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 
 namespace MarkdownViewer
 {
@@ -32,6 +33,23 @@ namespace MarkdownViewer
                 app.UseDeveloperExceptionPage();
             }
 
+            var filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
+            var staticFilePaths = Configuration.GetValue<string>("StaticFilePaths");
+
+            if (staticFilePaths != null)
+            {
+                var staticFilePathsArray = staticFilePaths.Split(',');
+                foreach (var path in staticFilePathsArray)
+                {
+                    app.UseStaticFiles(new StaticFileOptions
+                    {
+                        FileProvider = new PhysicalFileProvider(Path.Combine(filepath, path)),
+                        RequestPath = $"/{path}"
+                    });
+                }
+            }
+
             app.Run(async context =>
             {
                 var subPath = context?.Request?.Path.Value?.Substring(1);
@@ -39,7 +57,6 @@ namespace MarkdownViewer
                 {
                     subPath = Configuration.GetValue<string>("StartPage") ?? "Readme.md";
                 }
-                var filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                 var path = Path.Combine(filepath, subPath);
                 if(!File.Exists(path))
