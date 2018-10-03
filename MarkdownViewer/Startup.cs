@@ -33,7 +33,12 @@ namespace MarkdownViewer
                 app.UseDeveloperExceptionPage();
             }
 
-            var filepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var filepath = Configuration.GetValue<string>("BasePath") ?? Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var relativePath = Configuration.GetValue<string>("RelativePath");
+            if (relativePath != null)
+            {
+                filepath = Path.Combine(filepath, relativePath);
+            }
 
             var staticFilePaths = Configuration.GetValue<string>("StaticFilePaths");
 
