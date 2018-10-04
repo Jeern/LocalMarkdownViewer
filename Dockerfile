@@ -6,6 +6,9 @@ RUN dotnet restore ./MarkdownViewer/MarkdownViewer.csproj
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release
+RUN dotnet publish -c Release -o .
+
+ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+EXPOSE 5000
 
 CMD /bin/sh
